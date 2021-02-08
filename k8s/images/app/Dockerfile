@@ -41,4 +41,4 @@ RUN yarn run build -p
 
 EXPOSE 8000
 
-ENTRYPOINT ["make", "altprodserver"]
+CMD ["make", "altprodserver"]

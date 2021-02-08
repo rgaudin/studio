@@ -6,7 +6,7 @@ x-studio-environment:
     SHELL: /bin/bash
     AWS_S3_ENDPOINT_URL: http://minio:9000
     DATA_DB_HOST: postgres
-    DJANGO_SETTINGS_MODULE: contentcuration.dev_settings
+    DJANGO_SETTINGS_MODULE: contentcuration.settings
     RUN_MODE: docker-compose
     CELERY_TIMEZONE: America/Los_Angeles
     CELERY_REDIS_DB: 0
@@ -19,22 +19,23 @@ x-studio-worker:
   &studio-worker
     build:
       context: .
-      dockerfile: docker/Dockerfile.dev
-    image: learningequality/studio-app-dev
+      dockerfile: docker/Dockerfile.prod
     depends_on:
       - minio
       - postgres
       - redis
-    volumes:
-      - .:/src
+    # volumes:
+    #   - .:/src
     environment: *studio-environment
 
 services:
   studio-app:
     <<: *studio-worker
-    entrypoint: python docker/entrypoint.py
-    command: yarn run devserver
+    entrypoint: docker/entrypoint.sh
+    command: make altprodserver
+    # command: yarn run devserver
     ports:
+      - "8081:8081"
       - "8080:8080"
       - "4000:4000"
 

@@ -21,6 +21,7 @@ from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 from rest_framework import routers
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 import contentcuration.views.admin as admin_views
 import contentcuration.views.base as views
@@ -184,3 +185,5 @@ urlpatterns += i18n_patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^manifest.webmanifest$', pwa.ManifestView.as_view(), name="manifest"),
 )
+
+urlpatterns += staticfiles_urlpatterns()

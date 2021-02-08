@@ -1,7 +1,7 @@
 altprodserver: NUM_PROCS:=3
 altprodserver: NUM_THREADS:=5
-altprodserver: collectstatic ensurecrowdinclient downloadmessages compilemessages
-	cd contentcuration/ && gunicorn contentcuration.wsgi:application --timeout=4000 --error-logfile=/var/log/gunicorn-error.log --workers=${NUM_PROCS} --threads=${NUM_THREADS} --bind=0.0.0.0:8081 --pid=/tmp/contentcuration.pid --log-level=debug || sleep infinity
+altprodserver: collectstatic
+	cd contentcuration && gunicorn contentcuration.wsgi:application --timeout=4000 --error-logfile=/var/log/gunicorn-error.log --workers=${NUM_PROCS} --threads=${NUM_THREADS} --bind=0.0.0.0:8081 --pid=/tmp/contentcuration.pid --log-level=debug
 
 contentnodegc:
 	cd contentcuration/ && python manage.py garbage_collect
@@ -113,12 +113,15 @@ i18n-download-glossary:
 i18n-upload-glossary:
 	python node_modules/kolibri-tools/lib/i18n/crowdin.py upload-glossary
 uploadmessages: ensurecrowdinclient
-	java -jar crowdin-cli.jar upload sources -b `git rev-parse --abbrev-ref HEAD`
+	java -jar crowdin-cli.jar upload sources -b hotfixes
+
+makemessages:
+	echo "makemessages"
 
 # we need to depend on makemessages, since CrowdIn requires the en folder to be populated
 # in order for it to properly extract strings
 downloadmessages: ensurecrowdinclient makemessages
-	java -jar crowdin-cli.jar download -b `git rev-parse --abbrev-ref HEAD` || true
+	java -jar crowdin-cli.jar download -b hotfixes || true
 	# Manual hack to add es language by copying es_ES to es
 	cp -r contentcuration/locale/es_ES contentcuration/locale/es
 
@@ -137,7 +140,7 @@ docs: clean-docs
 setup:
 	python contentcuration/manage.py setup
 
-export COMPOSE_PROJECT_NAME=studio_$(shell git rev-parse --abbrev-ref HEAD)
+export COMPOSE_PROJECT_NAME=studio_hotfixes
 
 purge-postgres:
 	-PGPASSWORD=kolibri dropdb -U learningequality "kolibri-studio" --port 5432 -h localhost
